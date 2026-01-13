@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <base href="https://cdn.jsdelivr.net/gh/genizy/web-port@de75523557e46f375fc9173a9a0c0d34d8ed34f9/thats-not-my-neighbor/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+    <title>That's not my neighbor</title>
+    <link rel="stylesheet" href="style.css">
+    <link id="-gd-engine-icon" rel="icon" type="image/png" href="thats-not-my-neighbor.icon.png" />
+    <link rel="apple-touch-icon" href="thats-not-my-neighbor.apple-touch-icon.png" />
+</head>
+
+<body>
+    <script src="main.js"></script>
+    <div id="loading-text" style="color: white; font-family: cursive; font-size: 48px; text-align: center; margin-top: 20px;">LOADING...</div>
+    <canvas id="canvas"> Your browser does not support the canvas tag. </canvas>
+    <noscript> Your browser does not support JavaScript. </noscript>
+    <div id="status">
+        <img id="status-splash" class="show-image--true fullsize--false use-filter--true" src="thats-not-my-neighbor.png" alt="">
+        <progress id="status-progress"></progress>
+        <div id="status-notice"></div>
+    </div>
+    <script src="thats-not-my-neighbor.js"></script>
+    <script>
+        const GODOT_CONFIG = {
+            "args": [],
+            "canvasResizePolicy": 2,
+            "ensureCrossOriginIsolationHeaders": false,
+            "executable": "thats-not-my-neighbor",
+            "experimentalVK": false,
+            "fileSizes": {
+                "thats-not-my-neighbor.pck": 410934256,
+                "thats-not-my-neighbor.wasm": 43444261
+            },
+            "focusCanvas": true,
+            "gdextensionLibs": []
+        };
+        const GODOT_THREADS_ENABLED = false;
+        const engine = new Engine(GODOT_CONFIG);
+        window.godotrunfunction = function () {
+            const statusOverlay = document.getElementById('status');
+            const statusProgress = document.getElementById('status-progress');
+            const statusNotice = document.getElementById('status-notice');
+            let initializing = true;
+            let statusMode = '';
+
+            function setStatusMode(mode) {
+                if (statusMode === mode || !initializing) {
+                    return;
+                }
+                if (mode === 'hidden') {
+                    statusOverlay.remove();
+                    initializing = false;
+                    return;
+                }
+                statusOverlay.style.visibility = 'visible';
+                statusProgress.style.display = mode === 'progress' ? 'block' : 'none';
+                statusNotice.style.display = mode === 'notice' ? 'block' : 'none';
+                statusMode = mode;
+            }
+
+            function setStatusNotice(text) {
+                while (statusNotice.lastChild) {
+                    statusNotice.removeChild(statusNotice.lastChild);
+                }
+                const lines = text.split('\n');
+                lines.forEach((line) => {
+                    statusNotice.appendChild(document.createTextNode(line));
+                    statusNotice.appendChild(document.createElement('br'));
+                });
+            }
+
+            function displayFailureNotice(err) {
+                console.error(err);
+                if (err instanceof Error) {
+                    setStatusNotice(err.message);
+                } else if (typeof err === 'string') {
+                    setStatusNotice(err);
+                } else {
+                    setStatusNotice('An unknown error occurred.');
+                }
+                setStatusMode('notice');
+                initializing = false;
+            }
+            const missing = Engine.getMissingFeatures({
+                threads: GODOT_THREADS_ENABLED,
+            });
+            if (missing.length !== 0) {
+                if (GODOT_CONFIG['serviceWorker'] && GODOT_CONFIG['ensureCrossOriginIsolationHeaders'] && 'serviceWorker' in navigator) {
+                    let serviceWorkerRegistrationPromise;
+                    try {
+                        serviceWorkerRegistrationPromise = navigator.serviceWorker.getRegistration();
+                    } catch (err) {
+                        serviceWorkerRegistrationPromise = Promise.reject(new Error('Service worker registration failed.'));
+                    }
+                    // There's a chance that installing the service worker would fix the issue
+                    Promise.race([
+                        serviceWorkerRegistrationPromise.then((registration) => {
+                            if (registration != null) {
+                                return Promise.reject(new Error('Service worker already exists.'));
+                            }
+                            return registration;
+                        }).then(() => engine.installServiceWorker()),
+                        // For some reason, `getRegistration()` can stall
+                        new Promise((resolve) => {
+                            setTimeout(() => resolve(), 2000);
+                        }),
+                    ]).then(() => {
+                        // Reload if there was no error.
+                        window.location.reload();
+                    }).catch((err) => {
+                        console.error('Error while registering service worker:', err);
+                    });
+                } else {
+                    // Display the message as usual
+                    const missingMsg = 'Error\nThe following features required to run Godot projects on the Web are missing:\n';
+                    displayFailureNotice(missingMsg + missing.join('\n'));
+                }
+            } else {
+                setStatusMode('progress');
+                engine.startGame({
+                    'onProgress': function (current, total) {
+                        if (current > 0 && total > 0) {
+                            statusProgress.value = current;
+                            statusProgress.max = total;
+                        } else {
+                            statusProgress.removeAttribute('value');
+                            statusProgress.removeAttribute('max');
+                        }
+                    },
+                }).then(() => {
+                    setStatusMode('hidden');
+                }, displayFailureNotice);
+            }
+        };
+    </script>
+
+    <!-- Downloaded From Noah's Tutoring Hub -->
+    <script>
+        console.log('%c🔄 Loading game downloaded from Noah\'s Tutoring Hub', 'color: #c27c15; font-weight: bold;');
+    </script>
+    
+    <div id="noahs-watermark" 
+         onclick="window.open('https://noahs-calculus-tutor.pages.dev/', '_blank'); this.style.transform='scale(0.95)'; setTimeout(() => this.style.transform='scale(1)', 100);"
+         ontouchstart="this.style.opacity='0.7';"
+         ontouchend="this.style.opacity='0.9'; setTimeout(() => window.open('https://noahs-calculus-tutor.pages.dev/', '_blank'), 100);"
+         style="
+            all: initial !important;
+            position: fixed !important;
+            bottom: 10px !important;
+            right: 10px !important;
+            background: rgba(0, 0, 0, 0.85) !important;
+            color: #c27c15 !important;
+            padding: 8px 12px !important;
+            border-radius: 5px !important;
+            font-family: 'Courier New', monospace !important;
+            font-size: 12px !important;
+            z-index: 2147483647 !important;
+            border: 1px solid #c27c15 !important;
+            opacity: 0.9 !important;
+            pointer-events: auto !important;
+            cursor: pointer !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+            backdrop-filter: blur(4px) !important;
+            box-shadow: 0 0 15px rgba(194, 124, 21, 0.4) !important;
+            transition: opacity 0.2s, transform 0.1s !important;
+            user-select: none !important;
+            -webkit-tap-highlight-color: transparent !important;
+        ">
+        <img src="https://raw.githubusercontent.com/NoahsAmazingTutoringHelp/Noahs-Calculus-Tutor/master/cuh.png" 
+             alt="Noah's Tutoring Hub" 
+             style="width: 16px !important; height: 16px !important; border-radius: 3px !important; pointer-events: none !important;"
+             onerror="this.style.display='none'">
+        <span style="pointer-events: none !important;">Downloaded from Noah's Tutoring Hub</span>
+    </div>
+
+    <script>
+        (function() {
+            var gameTitle = "That's Not My Neighbor";
+
+            function createWatermark() {
+                const watermark = document.createElement('div');
+                watermark.id = 'noahs-watermark';
+  
+                const logo = document.createElement('img');
+                logo.src = 'https://raw.githubusercontent.com/NoahsAmazingTutoringHelp/Noahs-Calculus-Tutor/master/cuh.png';
+                logo.alt = "Noah's Tutoring Hub";
+                logo.style.cssText = 'width: 16px !important; height: 16px !important; border-radius: 3px !important; display: block !important; pointer-events: none !important;';
+
+                const text = document.createElement('span');
+                text.textContent = 'Downloaded from Noah\'s Tutoring Hub';
+                text.style.cssText = 'pointer-events: none !important;';
+
+                watermark.appendChild(logo);
+                watermark.appendChild(text);
+
+                watermark.setAttribute('style', 
+                    'all: initial !important;' +
+                    'position: fixed !important;' +
+                    'bottom: 10px !important;' +
+                    'right: 10px !important;' +
+                    'background: rgba(0, 0, 0, 0.85) !important;' +
+                    'color: #c27c15 !important;' +
+                    'padding: 8px 12px !important;' +
+                    'border-radius: 5px !important;' +
+                    'font-family: \'Courier New\', monospace !important;' +
+                    'font-size: 12px !important;' +
+                    'z-index: 2147483647 !important;' +
+                    'border: 1px solid #c27c15 !important;' +
+                    'opacity: 0.9 !important;' +
+                    'pointer-events: auto !important;' +
+                    'cursor: pointer !important;' +
+                    'display: flex !important;' +
+                    'align-items: center !important;' +
+                    'gap: 8px !important;' +
+                    'backdrop-filter: blur(4px) !important;' +
+                    'box-shadow: 0 0 15px rgba(194, 124, 21, 0.4) !important;' +
+                    'transition: opacity 0.2s, transform 0.1s, box-shadow 0.2s, border-color 0.2s !important;' +
+                    'user-select: none !important;' +
+                    '-webkit-tap-highlight-color: transparent !important;'
+                );
+
+                logo.onerror = function() {
+                    this.style.display = 'none';
+                    watermark.setAttribute('style', watermark.getAttribute('style') + 'padding-left: 12px !important;');
+                };
+
+                watermark.setAttribute('role', 'button');
+                watermark.setAttribute('aria-label', 'Visit Noah\'s Tutoring Hub website');
+                watermark.setAttribute('tabindex', '0');
+
+                watermark.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    this.style.transform = 'scale(0.95) !important';
+                    this.style.transition = 'transform 0.1s !important';
+                    
+                    setTimeout(() => {
+                        this.style.transform = 'scale(1) !important';
+                        window.open('https://noahs-calculus-tutor.pages.dev/', '_blank');
+                    }, 100);
+                });
+
+                watermark.addEventListener('touchstart', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.style.opacity = '0.7 !important';
+                });
+                
+                watermark.addEventListener('touchend', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.style.opacity = '0.9 !important';
+
+                    this.style.transform = 'scale(0.95) !important';
+                    
+                    setTimeout(() => {
+                        this.style.transform = 'scale(1) !important';
+                        window.open('https://noahs-calculus-tutor.pages.dev/', '_blank');
+                    }, 100);
+                });
+
+                watermark.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        window.open('https://noahs-calculus-tutor.pages.dev/', '_blank');
+                    }
+                });
+
+                watermark.addEventListener('mouseenter', function() {
+                    this.style.opacity = '1 !important';
+                    this.style.transform = 'translateY(-2px) !important';
+                    this.style.boxShadow = '0 0 25px rgba(194, 124, 21, 0.8) !important';
+                    this.style.borderColor = '#e69500 !important';
+                });
+                
+                watermark.addEventListener('mouseleave', function() {
+                    this.style.opacity = '0.9 !important';
+                    this.style.transform = 'translateY(0) !important';
+                    this.style.boxShadow = '0 0 15px rgba(194, 124, 21, 0.4) !important';
+                    this.style.borderColor = '#c27c15 !important';
+                });
+
+                watermark.addEventListener('contextmenu', function(e) {
+                    e.preventDefault();
+                    return false;
+                });
+                
+                return watermark;
+            }
+
+            function addWatermark() {
+                const existing = document.getElementById('noahs-watermark');
+                if (!existing) {
+                    document.body.appendChild(createWatermark());
+                }
+            }
+
+            function protectWatermark() {
+                addWatermark();
+
+                const observer = new MutationObserver(function(mutations) {
+                    mutations.forEach(function(mutation) {
+                        if (mutation.removedNodes) {
+                            Array.from(mutation.removedNodes).forEach(function(node) {
+                                if (node.id === 'noahs-watermark' || 
+                                    (node.querySelector && node.querySelector('#noahs-watermark'))) {
+                                    setTimeout(addWatermark, 100);
+                                }
+                            });
+                        }
+                    });
+                });
+                
+                observer.observe(document.body, {
+                    childList: true,
+                    subtree: true
+                });
+
+                setInterval(addWatermark, 5000);
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', protectWatermark);
+            } else {
+                protectWatermark();
+            }
+
+            console.log('%c🎮 Game: "' + gameTitle + '", Downloaded from Noah\'s Tutoring Hub', 
+                'color: #c27c15; font-weight: bold; font-size: 14px;');
+            console.log('%c📚 Visit https://noahs-calculus-tutor.pages.dev/ for more games!', 
+                'color: #e69500;');
+        })();
+    </script>
+</body>
+
+</html>
